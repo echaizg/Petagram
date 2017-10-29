@@ -1,71 +1,130 @@
 package cursos.com.petagram.fragment;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import cursos.com.petagram.R;
-import cursos.com.petagram.adapter.MascotaAdapter;
-import cursos.com.petagram.db.ConstructorMascota;
+import cursos.com.petagram.adapter.FotoAdapter;
 import cursos.com.petagram.pojo.Mascota;
+import cursos.com.petagram.restApi.ConstantesRestApi;
+import cursos.com.petagram.restApi.EndPointApi;
+import cursos.com.petagram.restApi.JsonKeys;
+import cursos.com.petagram.restApi.adapter.RestApiAdapter;
+import cursos.com.petagram.restApi.model.MascotaResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MascotasFragment extends Fragment {
+
+    public class MascotasFragment extends Fragment {
+
+        private static final String TAG = InfoMascotaFragment.class.getName();
+        private List<Mascota> fotos;
+        private RecyclerView recyclerView;
+
+        public MascotasFragment() {
+            // Required empty public constructor
+        }
 
 
-    private static final String TAG = MascotasFragment.class.getName();
-    private List<Mascota> mascotas;
-    private RecyclerView vista;
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            // Inflate the layout for this fragment
+            View view = inflater.inflate(R.layout.fragment_mascotas, container, false);
+            recyclerView = (RecyclerView) view.findViewById(R.id.rvMascotas);
+
+            mostrarDatosUsuario(view);
+            generarImagenes();
 
 
-    public MascotasFragment() {
-        // Required empty public constructor
+            GridLayoutManager glm = new GridLayoutManager(getActivity(), 3);
+            recyclerView.setLayoutManager(glm);
+
+            return view;
+        }
+
+        private void mostrarDatosUsuario(View view) {
+
+
+            SharedPreferences preps = getContext().getSharedPreferences("datosPersonales", Context.MODE_PRIVATE);
+            String fullName = preps.getString(JsonKeys.USER_FULL_NAME, "");
+            String profilePicture = preps.getString(JsonKeys.PROFILE_PICTURE, "");
+
+            //TextView tvNombre = (TextView) view.findViewById(R.id.tvNombreUsuario);
+            //CircularImageView profilePic = (CircularImageView) view.findViewById(R.id.ivProfilePicture);
+
+           // if (!profilePicture.equals("")) {
+
+             //   Picasso.with(getContext())
+               ///         .load(profilePicture)
+                  //      .placeholder(R.drawable.pata).into(profilePic);
+            //}
+
+           // tvNombre.setText(fullName);
+
+
+        }
+
+        private void iniciarAdaptador() {
+
+            FotoAdapter fa = new FotoAdapter(fotos, getContext());
+            recyclerView.setAdapter(fa);
+            recyclerView.setHasFixedSize(true);
+
+        }
+
+        private void generarImagenes() {
+            Log.i(TAG, "Descargando imagenes");
+            fotos = new ArrayList<>();
+
+            SharedPreferences preps = getContext().getSharedPreferences("datosPersonales", Context.MODE_PRIVATE);
+            String idUsuario = preps.getString(JsonKeys.USER_ID, "");
+
+            RestApiAdapter raa = new RestApiAdapter();
+            Gson gsonMedia = raa.construyeGsonDeserializadorMediaRecent();
+            EndPointApi epa = raa.establecerConexionRestApiInstagram(gsonMedia);
+
+            final Call<MascotaResponse> mascotaResponseCall = epa.getUserRecentMedia(idUsuario, ConstantesRestApi.ACCESS_TOKEN);
+
+            mascotaResponseCall.enqueue(new Callback<MascotaResponse>() {
+                @Override
+                public void onResponse(Call<MascotaResponse> call, Response<MascotaResponse> response) {
+
+                    MascotaResponse mr = response.body();
+                    if (mr != null) {
+                        fotos = mr.getMascotas();
+                        Log.i(TAG, "fotos: " + fotos.size());
+                        iniciarAdaptador();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<MascotaResponse> call, Throwable t) {
+                    Toast.makeText(getContext(), "Fallo conexion, intente de nuevo.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Fallo conexion: " + t.toString());
+                }
+            });
+
+        }
+
     }
-
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_mascotas, container, false);
-        vista = (RecyclerView) view.findViewById(R.id.rvMascotas);
-
-        Log.i(TAG, "Llenando lista de mascotas");
-        generarMascotas();
-        Log.i(TAG, "Iniciand adaptador");
-        inicarAdaptador();
-
-
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        vista.setLayoutManager(llm);
-
-
-        return view;
-    }
-
-
-
-    private void inicarAdaptador() {
-        MascotaAdapter ma = new MascotaAdapter(mascotas,getContext());
-        vista.setAdapter(ma);
-    }
-
-    private void generarMascotas() {
-
-        ConstructorMascota cm = new ConstructorMascota(getContext());
-        mascotas = cm.obtenerDatos();
-
-    }
-}

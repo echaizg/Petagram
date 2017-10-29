@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="cursos.com.cristian.activity.ContactActivity">
+    tools:context="cursos.com.petagram.activity.ContactActivity">
 
     <include
         android:id="@+id/action_bar"

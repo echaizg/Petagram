@@ -16,6 +16,7 @@ import java.util.List;
 import cursos.com.petagram.R;
 import cursos.com.petagram.adapter.PageAdapter;
 import cursos.com.petagram.fragment.InfoMascotaFragment;
+import cursos.com.petagram.fragment.MascotasFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         generarToolbar();
         setupViewPager();
+
+        tabLayout.getTabAt(1).select();
 
 
 
@@ -89,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Fragment> agregarFragments() {
         List<Fragment> fragments = new ArrayList<>();
-        //fragments.add(new MascotasFragment());
-        fragments.add(new InfoMascotaFragment());
+        fragments.add(new MascotasFragment());
+      //  fragments.add(new InfoMascotaFragment());
         fragments.add(new InfoMascotaFragment());
 
         return fragments;

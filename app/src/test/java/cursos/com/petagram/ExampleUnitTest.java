@@ -1,4 +1,4 @@
-package cursos.com.cristian;
+package cursos.com.petagram;
 
 import org.junit.Test;
 
