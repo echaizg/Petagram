@@ -67,21 +67,6 @@ import retrofit2.Response;
 
 
             SharedPreferences preps = getContext().getSharedPreferences("datosPersonales", Context.MODE_PRIVATE);
-            String fullName = preps.getString(JsonKeys.USER_FULL_NAME, "");
-            String profilePicture = preps.getString(JsonKeys.PROFILE_PICTURE, "");
-
-            //TextView tvNombre = (TextView) view.findViewById(R.id.tvNombreUsuario);
-            //CircularImageView profilePic = (CircularImageView) view.findViewById(R.id.ivProfilePicture);
-
-           // if (!profilePicture.equals("")) {
-
-             //   Picasso.with(getContext())
-               ///         .load(profilePicture)
-                  //      .placeholder(R.drawable.pata).into(profilePic);
-            //}
-
-           // tvNombre.setText(fullName);
-
 
         }
 
@@ -99,7 +84,6 @@ import retrofit2.Response;
 
             SharedPreferences preps = getContext().getSharedPreferences("datosPersonales", Context.MODE_PRIVATE);
             String idUsuario = preps.getString(JsonKeys.USER_ID, "");
-
             RestApiAdapter raa = new RestApiAdapter();
             Gson gsonMedia = raa.construyeGsonDeserializadorMediaRecent();
             EndPointApi epa = raa.establecerConexionRestApiInstagram(gsonMedia);
